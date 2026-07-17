@@ -1,4 +1,5 @@
 import { Platform } from "react-native";
+import { isNativeModuleMissingError } from "./nativeModule";
 import type { AppleAuthOptions, SocialAuthResult } from "./types";
 
 type AppleAuthModule = typeof import("expo-apple-authentication");
@@ -91,6 +92,19 @@ export async function signInWithApple(
     };
   } catch (error) {
     const err = error as { code?: string; message?: string };
+    if (isNativeModuleMissingError(error)) {
+      return {
+        type: "error",
+        provider: "apple",
+        code: "module_not_available",
+        message:
+          "The Apple Authentication native module is not in this binary. It " +
+          "doesn't work in Expo Go, and may be excluded via " +
+          "expo.autolinking.exclude — rebuild your development build after " +
+          "changing native modules.",
+        underlyingError: error,
+      };
+    }
     if (err.code === "ERR_REQUEST_CANCELED") {
       return { type: "cancelled", provider: "apple" };
     }

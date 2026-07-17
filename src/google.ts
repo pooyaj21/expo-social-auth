@@ -1,3 +1,4 @@
+import { isNativeModuleMissingError } from "./nativeModule";
 import type {
   GoogleAuthConfig,
   SocialAuthResult,
@@ -110,6 +111,18 @@ export async function signInWithGoogle(): Promise<SocialAuthResult> {
     };
   } catch (error) {
     const err = error as { code?: string; message?: string };
+    if (isNativeModuleMissingError(error)) {
+      return {
+        type: "error",
+        provider: "google",
+        code: "module_not_available",
+        message:
+          "The Google Sign-In native module is not in this binary. It doesn't " +
+          "work in Expo Go, and may be excluded via expo.autolinking.exclude — " +
+          "rebuild your development build after changing native modules.",
+        underlyingError: error,
+      };
+    }
     if (err.code === statusCodes.SIGN_IN_CANCELLED) {
       return { type: "cancelled", provider: "google" };
     }

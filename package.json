@@ -10,6 +10,7 @@
   "files": [
     "src",
     "lib",
+    "app.plugin.js",
     "README.md",
     "LICENSE"
   ],
@@ -34,24 +35,17 @@
   ],
   "author": "Pooya Jalali",
   "license": "MIT",
+  "dependencies": {
+    "@react-native-google-signin/google-signin": "^16.1.2",
+    "expo-apple-authentication": "*"
+  },
   "peerDependencies": {
-    "@react-native-google-signin/google-signin": ">=13.0.0",
-    "expo-apple-authentication": "*",
     "react": "*",
     "react-native": "*"
   },
-  "peerDependenciesMeta": {
-    "@react-native-google-signin/google-signin": {
-      "optional": true
-    },
-    "expo-apple-authentication": {
-      "optional": true
-    }
-  },
   "devDependencies": {
-    "@react-native-google-signin/google-signin": "^16.1.2",
     "@types/react": "^19.0.0",
-    "expo-apple-authentication": "^55.0.13",
+    "expo": "^57.0.7",
     "react": "19.2.0",
     "react-native": "0.83.6",
     "typescript": "^5.6.0"
