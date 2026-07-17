@@ -1,4 +1,4 @@
-# expo-social-auth
+# @pj21/expo-social-auth
 
 Google and Apple sign-in for **Expo / React Native** apps with one unified, fully-typed API.
 
@@ -10,7 +10,7 @@ Google and Apple sign-in for **Expo / React Native** apps with one unified, full
 ## Installation
 
 ```sh
-npx expo install expo-social-auth
+npx expo install @pj21/expo-social-auth
 ```
 
 That's it — `@react-native-google-signin/google-signin` and `expo-apple-authentication` are installed with it and picked up by Expo autolinking (SDK 52+).
@@ -88,7 +88,7 @@ One plugin entry configures everything. Add it to `app.json` / `app.config.js`:
   "expo": {
     "plugins": [
       [
-        "expo-social-auth",
+        "@pj21/expo-social-auth",
         {
           "google": {
             "iosUrlScheme": "com.googleusercontent.apps.YOUR_IOS_CLIENT_ID"
@@ -122,7 +122,7 @@ Only the providers you explicitly enable get configured — omitting an option m
 You still need the accounts-side setup from the [checklist above](#whats-required-vs-optional), and to configure Google once at app startup (e.g. in your root layout):
 
 ```ts
-import { configureGoogleSignIn } from "expo-social-auth";
+import { configureGoogleSignIn } from "@pj21/expo-social-auth";
 
 configureGoogleSignIn({
   webClientId: "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com",
@@ -145,7 +145,7 @@ Either way, you still call `configureGoogleSignIn({ webClientId })` at startup �
 ### With the hook
 
 ```tsx
-import { useSocialAuth } from "expo-social-auth";
+import { useSocialAuth } from "@pj21/expo-social-auth";
 
 function LoginButtons() {
   const { signIn, loading, activeProvider } = useSocialAuth();
@@ -193,7 +193,7 @@ import {
   signInWithApple,
   signOutFromGoogle,
   isAppleSignInAvailable,
-} from "expo-social-auth";
+} from "@pj21/expo-social-auth";
 
 const result = await signInWithGoogle();
 if (result.type === "success") {

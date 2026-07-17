@@ -1,6 +1,9 @@
 {
-  "name": "expo-social-auth",
-  "version": "0.1.0",
+  "name": "@pj21/expo-social-auth",
+  "version": "1.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "Google and Apple sign-in for Expo / React Native apps with a unified, typed API. Returns provider tokens ready to send to your backend.",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
