@@ -1,4 +1,4 @@
-export type SocialProvider = "google" | "apple";
+export type SocialProvider = "google" | "apple" | "facebook";
 
 /**
  * Normalized user profile across providers.
@@ -30,9 +30,12 @@ export type SocialAuthErrorCode =
 export type SocialAuthSuccess = {
   type: "success";
   provider: SocialProvider;
-  /** JWT to verify on your backend (Google `idToken` / Apple `identityToken`). */
+  /**
+   * The token to verify on your backend: Google `idToken` / Apple
+   * `identityToken` (JWTs), or the Facebook access token.
+   */
   idToken: string;
-  /** Google only. */
+  /** Google and Facebook. */
   accessToken?: string;
   /** Apple only — one-time code, exchangeable server-side. */
   authorizationCode?: string;
@@ -73,4 +76,9 @@ export type GoogleAuthConfig = {
 export type AppleAuthOptions = {
   /** Defaults to requesting both full name and email. */
   requestedScopes?: ("fullName" | "email")[];
+};
+
+export type FacebookAuthOptions = {
+  /** Defaults to `["public_profile", "email"]`. */
+  permissions?: string[];
 };

@@ -1,11 +1,15 @@
 import { useCallback, useRef, useState } from "react";
 import { signInWithApple } from "./apple";
+import { signInWithFacebook, signOutFromFacebook } from "./facebook";
 import { signInWithGoogle, signOutFromGoogle } from "./google";
 import type {
   AppleAuthOptions,
+  FacebookAuthOptions,
   SocialAuthResult,
   SocialProvider,
 } from "./types";
+
+type SignInOptions = AppleAuthOptions & FacebookAuthOptions;
 
 type UseSocialAuthReturn = {
   /** True while any sign-in flow is running. */
@@ -16,15 +20,18 @@ type UseSocialAuthReturn = {
   lastResult: SocialAuthResult | null;
   signInWithGoogle: () => Promise<SocialAuthResult>;
   signInWithApple: (options?: AppleAuthOptions) => Promise<SocialAuthResult>;
+  signInWithFacebook: (
+    options?: FacebookAuthOptions,
+  ) => Promise<SocialAuthResult>;
   signIn: (
     provider: SocialProvider,
-    options?: AppleAuthOptions,
+    options?: SignInOptions,
   ) => Promise<SocialAuthResult>;
   signOut: () => Promise<void>;
 };
 
 /**
- * Unified hook for Google + Apple sign-in.
+ * Unified hook for Google + Apple + Facebook sign-in.
  *
  * ```tsx
  * const { signIn, loading } = useSocialAuth();
@@ -82,14 +89,29 @@ export function useSocialAuth(): UseSocialAuthReturn {
     [run],
   );
 
+  const facebook = useCallback(
+    (options?: FacebookAuthOptions) =>
+      run("facebook", () => signInWithFacebook(options)),
+    [run],
+  );
+
   const signIn = useCallback(
-    (provider: SocialProvider, options?: AppleAuthOptions) =>
-      provider === "google" ? google() : apple(options),
-    [google, apple],
+    (provider: SocialProvider, options?: SignInOptions) => {
+      switch (provider) {
+        case "google":
+          return google();
+        case "apple":
+          return apple(options);
+        case "facebook":
+          return facebook(options);
+      }
+    },
+    [google, apple, facebook],
   );
 
   const signOut = useCallback(async () => {
     await signOutFromGoogle();
+    await signOutFromFacebook();
     // Apple has no sign-out API; session state is your backend's concern.
   }, []);
 
@@ -99,6 +121,7 @@ export function useSocialAuth(): UseSocialAuthReturn {
     lastResult,
     signInWithGoogle: google,
     signInWithApple: apple,
+    signInWithFacebook: facebook,
     signIn,
     signOut,
   };

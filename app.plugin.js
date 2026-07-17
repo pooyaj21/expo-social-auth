@@ -31,10 +31,15 @@ function resolvePlugin(mod) {
  * - `apple`:
  *   - `true` — enables the Sign In with Apple capability/entitlement.
  *   - `false` (default) — skip Apple entirely.
+ * - `facebook`:
+ *   - `{ appID, clientToken, displayName, scheme, ... }` — passed through to the
+ *     react-native-fbsdk-next config plugin.
+ *   - `false` (default) — skip Facebook entirely.
  */
 const withSocialAuth = (config, props = {}) => {
   const google = props.google ?? false;
   const apple = props.apple ?? false;
+  const facebook = props.facebook ?? false;
   const plugins = [];
 
   if (google) {
@@ -58,6 +63,13 @@ const withSocialAuth = (config, props = {}) => {
     );
     plugins.push(applePlugin);
     config.ios = { ...config.ios, usesAppleSignIn: true };
+  }
+
+  if (facebook) {
+    const facebookPlugin = resolvePlugin(
+      require("react-native-fbsdk-next/app.plugin.js"),
+    );
+    plugins.push([facebookPlugin, facebook === true ? {} : facebook]);
   }
 
   return withPlugins(config, plugins);

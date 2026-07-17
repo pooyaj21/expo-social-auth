@@ -1,11 +1,11 @@
 # @pj21/expo-social-auth
 
-Google and Apple sign-in for **Expo / React Native** apps with one unified, fully-typed API.
+Google, Apple, and Facebook sign-in for **Expo / React Native** apps with one unified, fully-typed API.
 
 - ✅ One result shape for every provider — a discriminated union (`success` / `cancelled` / `error`), no try/catch needed
 - ✅ Returns the provider `idToken` ready to send to your backend for verification
 - ✅ Safe in **Expo Go** — native modules are loaded lazily, so nothing crashes; you get a clean `module_not_available` error instead
-- ✅ Single install — the Google and Apple SDKs come bundled and are autolinked automatically
+- ✅ Single install — the Google, Apple, and Facebook SDKs come bundled and are autolinked automatically
 
 ## Installation
 
@@ -13,7 +13,7 @@ Google and Apple sign-in for **Expo / React Native** apps with one unified, full
 npx expo install @pj21/expo-social-auth
 ```
 
-That's it — `@react-native-google-signin/google-signin` and `expo-apple-authentication` are installed with it and picked up by Expo autolinking (SDK 52+).
+That's it — `@react-native-google-signin/google-signin`, `expo-apple-authentication`, and `react-native-fbsdk-next` are installed with it and picked up by Expo autolinking (SDK 52+).
 
 > The providers require native code, so you need a [development build](https://docs.expo.dev/develop/development-builds/introduction/) (`npx expo run:ios` / `run:android`). They do **not** work in Expo Go.
 >
@@ -21,7 +21,7 @@ That's it — `@react-native-google-signin/google-signin` and `expo-apple-authen
 
 ### Using only one provider
 
-If you only use one provider, set it to `false` in the [config plugin](#config-plugin-managed-workflow) (e.g. `"apple": false`) so no native configuration is generated for it. To additionally keep the unused SDK's native code out of your app binary, use Expo autolinking's official exclude list — add it to your app's **`package.json`** (not `app.json`):
+If you don't use every provider, only enable the ones you need in the [config plugin](#config-plugin-managed-workflow) — disabled providers get no native configuration. To additionally keep an unused SDK's native code out of your app binary, use Expo autolinking's official exclude list — add it to your app's **`package.json`** (not `app.json`) with any of `expo-apple-authentication`, `@react-native-google-signin/google-signin`, `react-native-fbsdk-next`:
 
 ```json
 {
@@ -72,6 +72,15 @@ Then rebuild (`npx expo prebuild --clean` / `npx expo run:ios`). The excluded mo
 
 **Apple — optional:** `requestedScopes` on `signInWithApple()` (defaults to both `fullName` and `email`). No startup configuration is needed.
 
+**Facebook — required:**
+
+| # | Step | Where |
+| --- | --- | --- |
+| 1 | Create an app and get the **App ID** and **Client Token** | [Meta for Developers](https://developers.facebook.com/apps/) |
+| 2 | Pass `appID`, `clientToken`, `displayName`, and `scheme` (`fb` + App ID) to the config plugin | Config plugin (`facebook` option) — or native files in bare workflow |
+
+**Facebook — optional:** `permissions` on `signInWithFacebook()` (defaults to `["public_profile", "email"]`).
+
 > Apple's App Store review **requires** offering Sign In with Apple if your iOS app offers any other third-party login (like Google) — plan to ship both on iOS.
 
 How much native setup you need depends on your workflow:
@@ -93,7 +102,13 @@ One plugin entry configures everything. Add it to `app.json` / `app.config.js`:
           "google": {
             "iosUrlScheme": "com.googleusercontent.apps.YOUR_IOS_CLIENT_ID"
           },
-          "apple": true
+          "apple": true,
+          "facebook": {
+            "appID": "YOUR_FB_APP_ID",
+            "clientToken": "YOUR_FB_CLIENT_TOKEN",
+            "displayName": "YourApp",
+            "scheme": "fbYOUR_FB_APP_ID"
+          }
         }
       ]
     ]
@@ -117,6 +132,13 @@ One plugin entry configures everything. Add it to `app.json` / `app.config.js`:
 | `true` | Adds the Sign In with Apple capability/entitlement |
 | `false` *(default)* | Skip Apple configuration |
 
+#### `facebook` option
+
+| Value | Effect |
+| --- | --- |
+| `{ "appID", "clientToken", "displayName", "scheme", … }` | Configures the Facebook SDK on both platforms (options are passed through to the `react-native-fbsdk-next` plugin) |
+| `false` *(default)* | Skip Facebook configuration |
+
 Only the providers you explicitly enable get configured — omitting an option means that provider's native setup is skipped. Pick **one** of the `google` object modes: `iosUrlScheme` for standalone setups, `firebase: true` for Firebase setups.
 
 You still need the accounts-side setup from the [checklist above](#whats-required-vs-optional), and to configure Google once at app startup (e.g. in your root layout):
@@ -137,6 +159,7 @@ If your `ios/` and `android/` folders are committed, config plugins don't run �
 - **Apple**: in Xcode, add the **Sign In with Apple** capability to your target (adds `com.apple.developer.applesignin` to your `.entitlements` file).
 - **Google (iOS)**: add your reversed iOS client ID (`com.googleusercontent.apps.YOUR_IOS_CLIENT_ID`) as a URL scheme in `Info.plist` under `CFBundleURLTypes`. If you use Firebase, this is the `REVERSED_CLIENT_ID` from `GoogleService-Info.plist`, and the SDK picks up the client ID from that file automatically.
 - **Google (Android)**: no native changes needed — just make sure your signing key's SHA-1 fingerprint is registered (in the Firebase console or in the Android OAuth client in Google Cloud Console).
+- **Facebook**: follow the [fbsdk-next manual setup](https://github.com/thebergamo/react-native-fbsdk-next#manual-linking) — App ID/Client Token in `Info.plist` and `strings.xml`/`AndroidManifest.xml`, plus the `fb…` URL scheme on iOS.
 
 Either way, you still call `configureGoogleSignIn({ webClientId })` at startup — the **web client ID** is what makes Google return an `idToken` you can verify on your backend.
 
@@ -150,7 +173,7 @@ import { useSocialAuth } from "@pj21/expo-social-auth";
 function LoginButtons() {
   const { signIn, loading, activeProvider } = useSocialAuth();
 
-  const handle = async (provider: "google" | "apple") => {
+  const handle = async (provider: "google" | "apple" | "facebook") => {
     const result = await signIn(provider);
 
     switch (result.type) {
@@ -177,6 +200,11 @@ function LoginButtons() {
         title="Continue with Apple"
         disabled={loading}
         onPress={() => handle("apple")}
+      />
+      <Button
+        title="Continue with Facebook"
+        disabled={loading}
+        onPress={() => handle("facebook")}
       />
     </>
   );
@@ -216,6 +244,9 @@ const showApple = await isAppleSignInAvailable();
 | `isGoogleSignInAvailable()` | `true` if the native Google module is installed/linked |
 | `signInWithApple(options?)` | Runs the Apple flow → `Promise<SocialAuthResult>` |
 | `isAppleSignInAvailable()` | `Promise<boolean>` — iOS 13+ with the module installed |
+| `signInWithFacebook(options?)` | Runs the Facebook flow → `Promise<SocialAuthResult>` |
+| `signOutFromFacebook()` | Logs out of Facebook. Never throws. |
+| `isFacebookSignInAvailable()` | `true` if the native Facebook module is installed/linked |
 | `useSocialAuth()` | React hook wrapping all of the above with `loading` state |
 
 ### `configureGoogleSignIn(config)` options
@@ -235,22 +266,28 @@ const showApple = await isAppleSignInAvailable();
 | --- | --- | --- |
 | `requestedScopes` | No | Array of `"fullName"` / `"email"` (default: both) |
 
+### `signInWithFacebook(options?)` options
+
+| Option | Required | Description |
+| --- | --- | --- |
+| `permissions` | No | Facebook permissions to request (default: `["public_profile", "email"]`) |
+
 ### `SocialAuthResult`
 
 ```ts
 type SocialAuthResult =
   | {
       type: "success";
-      provider: "google" | "apple";
-      idToken: string;            // JWT — verify on your backend
-      accessToken?: string;       // Google only
+      provider: "google" | "apple" | "facebook";
+      idToken: string;            // the token to verify on your backend
+      accessToken?: string;       // Google & Facebook
       authorizationCode?: string; // Apple only
       user: SocialUser;
     }
-  | { type: "cancelled"; provider: "google" | "apple" }
+  | { type: "cancelled"; provider: "google" | "apple" | "facebook" }
   | {
       type: "error";
-      provider: "google" | "apple";
+      provider: "google" | "apple" | "facebook";
       code: SocialAuthErrorCode;
       message: string;
       underlyingError?: unknown;
@@ -264,7 +301,7 @@ Error codes: `module_not_available`, `play_services_not_available`, `in_progress
 ```ts
 type SocialUser = {
   id: string;
-  email: string | null;
+  email: string | null;  // Facebook: needs the "email" permission granted
   name: string | null;
   givenName: string | null;
   familyName: string | null;
@@ -280,6 +317,7 @@ Never trust the client — always verify the `idToken` server-side:
 
 - **Google**: verify the JWT against `https://www.googleapis.com/oauth2/v3/certs` and check `aud` equals your **web client ID**.
 - **Apple**: verify against `https://appleid.apple.com/auth/keys` and check `aud` equals your bundle ID.
+- **Facebook**: the token is an opaque access token, not a JWT — validate it with `GET https://graph.facebook.com/debug_token?input_token=TOKEN&access_token=APP_ID|APP_SECRET` and check `app_id` and `is_valid`.
 
 ## License
 

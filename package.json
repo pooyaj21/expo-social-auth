@@ -40,7 +40,8 @@
   "license": "MIT",
   "dependencies": {
     "@react-native-google-signin/google-signin": "^16.1.2",
-    "expo-apple-authentication": "*"
+    "expo-apple-authentication": "*",
+    "react-native-fbsdk-next": "^13.4.3"
   },
   "peerDependencies": {
     "react": "*",
