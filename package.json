@@ -1,0 +1,59 @@
+{
+  "name": "expo-social-auth",
+  "version": "0.1.0",
+  "description": "Google and Apple sign-in for Expo / React Native apps with a unified, typed API. Returns provider tokens ready to send to your backend.",
+  "main": "lib/commonjs/index.js",
+  "module": "lib/module/index.js",
+  "types": "lib/typescript/index.d.ts",
+  "react-native": "src/index.ts",
+  "source": "src/index.ts",
+  "files": [
+    "src",
+    "lib",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "clean": "rm -rf lib",
+    "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run build:types",
+    "build:cjs": "tsc -p tsconfig.build.json --module commonjs --outDir lib/commonjs",
+    "build:esm": "tsc -p tsconfig.build.json --module esnext --outDir lib/module",
+    "build:types": "tsc -p tsconfig.build.json --declaration --emitDeclarationOnly --outDir lib/typescript",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "expo",
+    "react-native",
+    "social-login",
+    "google-signin",
+    "apple-signin",
+    "authentication",
+    "oauth"
+  ],
+  "author": "Pooya Jalali",
+  "license": "MIT",
+  "peerDependencies": {
+    "@react-native-google-signin/google-signin": ">=13.0.0",
+    "expo-apple-authentication": "*",
+    "react": "*",
+    "react-native": "*"
+  },
+  "peerDependenciesMeta": {
+    "@react-native-google-signin/google-signin": {
+      "optional": true
+    },
+    "expo-apple-authentication": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@react-native-google-signin/google-signin": "^16.1.2",
+    "@types/react": "^19.0.0",
+    "expo-apple-authentication": "^55.0.13",
+    "react": "19.2.0",
+    "react-native": "0.83.6",
+    "typescript": "^5.6.0"
+  }
+}
