@@ -239,7 +239,7 @@ const showApple = await isAppleSignInAvailable();
 | Function | Description |
 | --- | --- |
 | `configureGoogleSignIn(config)` | Store Google config; applied lazily on first sign-in. Safe to call anywhere, including Expo Go. |
-| `signInWithGoogle()` | Runs the Google flow → `Promise<SocialAuthResult>` |
+| `signInWithGoogle(options?)` | Runs the Google flow → `Promise<SocialAuthResult>` |
 | `signOutFromGoogle()` | Revokes access and signs out. Never throws. |
 | `isGoogleSignInAvailable()` | `true` if the native Google module is installed/linked |
 | `signInWithApple(options?)` | Runs the Apple flow → `Promise<SocialAuthResult>` |
@@ -259,6 +259,23 @@ const showApple = await isAppleSignInAvailable();
 | `offlineAccess` | No | Request a server auth code for offline access |
 | `hostedDomain` | No | Restrict sign-in to a Google Workspace domain |
 | `profileImageSize` | No | Requested avatar size in pixels |
+
+### `signInWithGoogle(options?)` options
+
+| Option | Required | Description |
+| --- | --- | --- |
+| `autoSelect` | No | Reuse a cached Google session instead of raising the picker (default: `false`) |
+
+`autoSelect` is **off by default**, and the default is the one you want unless you have a reason:
+
+| `autoSelect` | Behaviour |
+| --- | --- |
+| `false` (default) | The account picker is raised on every sign-in. The user confirms, and can switch accounts. |
+| `true` | If the native SDK still holds a session, it is returned with **no picker and no prompt**. |
+
+`true` means the last account to sign in on this device signs in again silently — wrong on a shared or handed-over phone, and it leaves no way to pick a different account without calling `signOutFromGoogle()` first. On Android the default path goes through Credential Manager's "Sign in with Google" flow, which always presents the chooser.
+
+**Call `signOut()` from your app's own logout**, whatever you set here. Neither the Google nor the Facebook session is cleared by your backend logging the user out, so a stale session outlives the account that created it.
 
 ### `signInWithApple(options?)` options
 

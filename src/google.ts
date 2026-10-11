@@ -1,6 +1,7 @@
 import { isNativeModuleMissingError } from "./nativeModule";
 import type {
   GoogleAuthConfig,
+  GoogleAuthOptions,
   SocialAuthResult,
   SocialUser,
 } from "./types";
@@ -62,7 +63,15 @@ function toSocialUser(
   };
 }
 
-export async function signInWithGoogle(): Promise<SocialAuthResult> {
+/**
+ * Raises the Google account picker and resolves with the chosen account.
+ *
+ * Pass `{ autoSelect: true }` to reuse a session the native SDK already holds
+ * instead — see `GoogleAuthOptions.autoSelect` for what that costs.
+ */
+export async function signInWithGoogle(
+  options?: GoogleAuthOptions,
+): Promise<SocialAuthResult> {
   const module = getGoogleModule();
   if (!module) {
     return {
@@ -81,7 +90,12 @@ export async function signInWithGoogle(): Promise<SocialAuthResult> {
     ensureConfigured(module);
     await GoogleSignin.hasPlayServices();
 
-    let googleUser = GoogleSignin.getCurrentUser();
+    // Without autoSelect the cached session is deliberately ignored, so the
+    // picker is raised on every sign-in. Reusing it silently means the last
+    // account to sign in on this device signs in again with no prompt — which
+    // is wrong on a shared or handed-over phone, and leaves no way to switch
+    // accounts without signing out first.
+    let googleUser = options?.autoSelect ? GoogleSignin.getCurrentUser() : null;
     if (!googleUser || !GoogleSignin.hasPreviousSignIn()) {
       const response = await GoogleSignin.signIn();
       if (response.type !== "success" || !response.data) {

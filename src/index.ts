@@ -15,6 +15,7 @@ export type {
   AppleAuthOptions,
   FacebookAuthOptions,
   GoogleAuthConfig,
+  GoogleAuthOptions,
   SocialAuthCancelled,
   SocialAuthError,
   SocialAuthErrorCode,

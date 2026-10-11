@@ -73,6 +73,18 @@ export type GoogleAuthConfig = {
   profileImageSize?: number;
 };
 
+export type GoogleAuthOptions = {
+  /**
+   * `true` reuses the Google session the native SDK already holds, when there
+   * is one, and skips the account picker entirely — fastest, but it means the
+   * last account to sign in on this device signs in again with no prompt and
+   * no way to choose another. `false` (the default) always raises the picker.
+   *
+   * @default false
+   */
+  autoSelect?: boolean;
+};
+
 export type AppleAuthOptions = {
   /** Defaults to requesting both full name and email. */
   requestedScopes?: ("fullName" | "email")[];

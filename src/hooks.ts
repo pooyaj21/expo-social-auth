@@ -5,11 +5,12 @@ import { signInWithGoogle, signOutFromGoogle } from "./google";
 import type {
   AppleAuthOptions,
   FacebookAuthOptions,
+  GoogleAuthOptions,
   SocialAuthResult,
   SocialProvider,
 } from "./types";
 
-type SignInOptions = AppleAuthOptions & FacebookAuthOptions;
+type SignInOptions = AppleAuthOptions & FacebookAuthOptions & GoogleAuthOptions;
 
 type UseSocialAuthReturn = {
   /** True while any sign-in flow is running. */
@@ -18,7 +19,7 @@ type UseSocialAuthReturn = {
   activeProvider: SocialProvider | null;
   /** Result of the last completed sign-in attempt. */
   lastResult: SocialAuthResult | null;
-  signInWithGoogle: () => Promise<SocialAuthResult>;
+  signInWithGoogle: (options?: GoogleAuthOptions) => Promise<SocialAuthResult>;
   signInWithApple: (options?: AppleAuthOptions) => Promise<SocialAuthResult>;
   signInWithFacebook: (
     options?: FacebookAuthOptions,
@@ -79,7 +80,8 @@ export function useSocialAuth(): UseSocialAuthReturn {
   );
 
   const google = useCallback(
-    () => run("google", signInWithGoogle),
+    (options?: GoogleAuthOptions) =>
+      run("google", () => signInWithGoogle(options)),
     [run],
   );
 
@@ -99,7 +101,7 @@ export function useSocialAuth(): UseSocialAuthReturn {
     (provider: SocialProvider, options?: SignInOptions) => {
       switch (provider) {
         case "google":
-          return google();
+          return google(options);
         case "apple":
           return apple(options);
         case "facebook":
