@@ -5,19 +5,19 @@ Google, Apple, and Facebook sign-in for **Expo / React Native** apps with one un
 - ✅ One result shape for every provider — a discriminated union (`success` / `cancelled` / `error`), no try/catch needed
 - ✅ Returns the provider `idToken` ready to send to your backend for verification
 - ✅ Safe in **Expo Go** — native modules are loaded lazily, so nothing crashes; you get a clean `module_not_available` error instead
-- ✅ Single install — the Google, Apple, and Facebook SDKs come bundled and are autolinked automatically
+- ✅ Google and Facebook SDKs come bundled and autolinked; the SDK-versioned Apple module stays an optional peer so it tracks your Expo SDK
 
 ## Installation
 
 ```sh
-npx expo install @pj21/expo-social-auth
+npx expo install @pj21/expo-social-auth expo-apple-authentication
 ```
 
-That's it — `@react-native-google-signin/google-signin`, `expo-apple-authentication`, and `react-native-fbsdk-next` are installed with it and picked up by Expo autolinking (SDK 52+).
+`@react-native-google-signin/google-signin` and `react-native-fbsdk-next` come bundled and are picked up by Expo autolinking (SDK 52+).
+
+`expo-apple-authentication` is an **optional peer dependency**, because it ships one build per Expo SDK and the version must match *your* SDK — `npx expo install` picks the right one. Skip it if you don't use Apple sign-in: `signInWithApple()` then returns a `module_not_available` error result instead of crashing.
 
 > The providers require native code, so you need a [development build](https://docs.expo.dev/develop/development-builds/introduction/) (`npx expo run:ios` / `run:android`). They do **not** work in Expo Go.
->
-> On an older Expo SDK, align the Apple module with your SDK after installing: `npx expo install expo-apple-authentication`.
 
 ### Using only one provider
 
